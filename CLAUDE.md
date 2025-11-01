@@ -8,28 +8,30 @@ AxiArt is a generative art system for creating algorithmic artwork optimized for
 
 ## Development Commands
 
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management.
+
 ### Installation
 ```bash
-pip install -e .
+uv sync
 ```
 
 ### Running Examples
 ```bash
 cd examples
-python example_simple_starter.py      # Basic spiral example
-python example_abstract_character.py  # Complex artistic composition
-python example_mixed_landscape.py     # Multi-pattern landscape
-python example_showcase.py            # All patterns in one
+uv run python example_simple_starter.py      # Basic spiral example
+uv run python example_abstract_character.py  # Complex artistic composition
+uv run python example_mixed_landscape.py     # Multi-pattern landscape
+uv run python example_showcase.py            # All patterns in one
 ```
 
 ### Code Formatting
 ```bash
-black axiart/                         # Format all code (line-length: 100)
+uv run black axiart/                  # Format all code (line-length: 100)
 ```
 
 ### Testing (if pytest is installed)
 ```bash
-pytest                                # Run tests if they exist
+uv run pytest                         # Run tests if they exist
 ```
 
 ## Architecture

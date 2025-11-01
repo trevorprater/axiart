@@ -14,9 +14,15 @@ A modular Python system for creating algorithmic art optimized for the AxiDraw V
 
 ## Installation
 
+This project uses [uv](https://docs.astral.sh/uv/) for fast, reliable dependency management.
+
 ```bash
+# Install uv if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install dependencies
 cd axiart
-pip install -e .
+uv sync
 ```
 
 ### Dependencies
@@ -261,8 +267,8 @@ The `examples/` directory contains 10 diverse example scripts:
 
 ```bash
 cd examples
-python example_simple_starter.py
-python example_mixed_landscape.py
+uv run python example_simple_starter.py
+uv run python example_mixed_landscape.py
 # etc.
 ```
 
