@@ -24,8 +24,10 @@ mod grid;
 #[pymodule]
 fn axiart_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<dendrite::DendriteGenerator>()?;
+    m.add_class::<dendrite::BranchingStyle>()?;
     m.add_class::<noise_core::PerlinNoise>()?;
     m.add_class::<flow_field::FlowFieldGenerator>()?;
+    m.add_class::<flow_field::FieldType>()?;
     m.add_class::<noise_pattern::NoisePatternGenerator>()?;
     m.add_class::<spiral::SpiralGenerator>()?;
     m.add_class::<grid::GridGenerator>()?;
