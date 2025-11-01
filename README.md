@@ -2,6 +2,8 @@
 
 A modular Python system for creating algorithmic art optimized for the AxiDraw V3 pen plotter. Generate beautiful, plottable SVG artwork with dendrites, spirals, grids, noise fields, and flow patterns.
 
+![Example Portrait](examples/output_portrait.svg)
+
 ## Features
 
 - **5 Pattern Generators**: Dendrite/branching, spirals, grids, noise/texture fields, and flow fields
