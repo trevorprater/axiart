@@ -1,0 +1,40 @@
+[package]
+name = "axiart-core"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "axiart_core"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# Python bindings
+pyo3 = { version = "0.22", features = ["extension-module", "abi3-py39"] }
+numpy = "0.22"
+
+# Core data structures
+ndarray = { version = "0.16", features = ["rayon"] }
+
+# No external spatial indexing needed - using custom grid hash (optimal)
+
+# Noise generation (Perlin/Simplex)
+noise = "0.9"
+
+# Random number generation
+rand = "0.8"
+rand_chacha = "0.3"
+
+# Parallel iteration
+rayon = "1.10"
+
+# Math utilities
+num-traits = "0.2"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[profile.bench]
+inherits = "release"

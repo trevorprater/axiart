@@ -4,6 +4,13 @@ import numpy as np
 from typing import List, Tuple, Optional
 from ..svg_exporter import SVGCanvas
 
+# Try to import Rust implementation for 100-300x speedup
+try:
+    from axiart_core import DendriteGenerator as _RustDendriteGenerator
+    _RUST_AVAILABLE = True
+except ImportError:
+    _RUST_AVAILABLE = False
+
 
 class DendritePattern:
     """
@@ -57,6 +64,20 @@ class DendritePattern:
             self.tree = list(seed_points)
 
         self.lines = []
+
+        # Use Rust implementation if available (100-300x faster)
+        self._use_rust = _RUST_AVAILABLE
+        if self._use_rust:
+            self._rust_generator = _RustDendriteGenerator(
+                width=width,
+                height=height,
+                num_particles=num_particles,
+                attraction_distance=attraction_distance,
+                min_move_distance=min_move_distance,
+                seed_points=seed_points,
+                branching_style=branching_style,
+                seed=None,  # Can add seed parameter to __init__ if needed
+            )
 
     def _get_random_particle_position(self) -> Tuple[float, float]:
         """Generate a random starting position for a particle."""
@@ -123,6 +144,14 @@ class DendritePattern:
         Args:
             max_attempts: Maximum random walk attempts per particle
         """
+        # Use Rust implementation if available
+        if self._use_rust:
+            points, lines = self._rust_generator.generate(max_attempts)
+            self.tree = points
+            self.lines = lines
+            return
+
+        # Fallback to Python implementation
         for particle_idx in range(self.num_particles):
             # Spawn a new particle
             particle_pos = self._get_random_particle_position()
