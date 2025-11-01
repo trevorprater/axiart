@@ -121,41 +121,6 @@ class SpiralPattern:
             wave_frequency=wave_frequency
         )
 
-    def generate_fermat_spiral(
-        self,
-        num_points: int = 1000,
-        spacing: float = 2.0,
-        rotation: float = 0
-    ):
-        """
-        Generate a Fermat (parabolic) spiral pattern.
-
-        Note: This method uses a Python implementation as it's not yet
-        ported to Rust (Fermat spirals are less commonly used).
-
-        Args:
-            num_points: Number of points
-            spacing: Spacing between points
-            rotation: Rotation offset
-        """
-        import numpy as np
-
-        points = []
-        golden_angle = np.pi * (3 - np.sqrt(5))  # Golden angle in radians
-
-        for i in range(num_points):
-            theta = i * golden_angle + rotation
-            r = spacing * np.sqrt(i)
-
-            x = self.center[0] + r * np.cos(theta)
-            y = self.center[1] + r * np.sin(theta)
-
-            # Only add if within bounds
-            if 0 <= x <= self.width and 0 <= y <= self.height:
-                points.append((x, y))
-
-        self.spirals.append(points)
-
     def draw(self, canvas: SVGCanvas, layer: str, as_points: bool = False):
         """
         Draw the spiral pattern on the canvas.

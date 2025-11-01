@@ -95,22 +95,6 @@ class GridPattern:
             strength=strength
         )
 
-    def apply_custom_distortion(
-        self,
-        distortion_func: Callable[[float, float], Tuple[float, float]]
-    ):
-        """
-        Apply a custom distortion function to grid points.
-
-        Args:
-            distortion_func: Function that takes (x, y) and returns (new_x, new_y)
-        """
-        distorted_lines = []
-        for line in self.lines:
-            distorted_points = [distortion_func(x, y) for x, y in line]
-            distorted_lines.append(distorted_points)
-        self.lines = distorted_lines
-
     def draw(self, canvas: SVGCanvas, layer: str):
         """
         Draw the grid pattern on the canvas.
