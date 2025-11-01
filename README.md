@@ -1,36 +1,56 @@
 # AxiArt - Generative Art for AxiDraw V3
 
-A modular Python system for creating algorithmic art optimized for the AxiDraw V3 pen plotter. Generate beautiful, plottable SVG artwork with dendrites, spirals, grids, noise fields, and flow patterns.
+A high-performance Python/Rust system for creating algorithmic art optimized for the AxiDraw V3 pen plotter. Generate plottable SVG artwork with dendrites, spirals, grids, noise fields, and flow patterns.
 
-![Example Portrait](examples/output_portrait.svg)
+**Performance**: Pattern generation accelerated 10-300x using Rust implementations with zero capacity limits.
 
 ## Features
 
-- **5 Pattern Generators**: Dendrite/branching, spirals, grids, noise/texture fields, and flow fields
-- **SVG Export**: Clean vector output optimized for AxiDraw pen plotting
-- **Composable System**: Layer multiple patterns with selective coloring
-- **Minimalist Aesthetic**: Clean, professional designs suitable for pen plotting
-- **Extensive Examples**: 10 example scripts showing diverse artistic variations
+- **6 Rust-accelerated pattern generators**: Dendrites, spirals, grids, noise fields, flow fields, and Perlin noise
+- **High performance**: 8-20M points/sec generation speed depending on pattern type
+- **SVG export**: Clean vector output optimized for AxiDraw pen plotting
+- **Composable system**: Layer multiple patterns with selective coloring
+- **Production-ready**: Tested with 10,000+ particles, extreme configurations
+
+## Performance Benchmarks
+
+| Pattern | Performance | Speedup vs Python |
+|---------|-------------|-------------------|
+| DendritePattern | 920 particles/sec (10K particles) | 100-300x |
+| FlowFieldPattern | 12.5M points/sec | 5-20x |
+| NoisePattern | 12M points/sec (stippling) | 5-15x |
+| SpiralPattern | 12-20M points/sec | 2-5x |
+| GridPattern | 8-12M points/sec | 2-4x |
+
+See `RUST_PERFORMANCE.md` for detailed benchmarks and architecture.
 
 ## Installation
 
-This project uses [uv](https://docs.astral.sh/uv/) for fast, reliable dependency management.
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management and Rust bindings via Maturin.
 
 ```bash
-# Install uv if you haven't already
+# Install uv if needed
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install dependencies
+# Clone and install dependencies
 cd axiart
 uv sync
+
+# Build Rust acceleration library (required)
+uv run maturin develop --release
 ```
 
 ### Dependencies
 
-- numpy >= 1.24.0
+**Runtime**:
+- Python >= 3.9
 - svgwrite >= 1.4.3
-- noise >= 1.2.2
-- scipy >= 1.10.0
+
+**Build**:
+- Rust toolchain (automatically installed by Maturin)
+- Maturin >= 1.7
+
+**Note**: `numpy`, `noise`, and `scipy` are no longer required for pattern generation (handled by Rust).
 
 ## Quick Start
 
@@ -38,15 +58,15 @@ uv sync
 from axiart import SVGCanvas
 from axiart.patterns import SpiralPattern
 
-# Create canvas
+# Create canvas (A4 dimensions in mm)
 canvas = SVGCanvas(width=297, height=210)
 canvas.create_layer("main", color="black", stroke_width=0.5)
 canvas.set_layer("main")
 
-# Generate spiral
-spiral = SpiralPattern(width=297, height=210)
-spiral.generate_fermat_spiral(num_points=800, spacing=3.0)
-spiral.draw(canvas, "main", as_points=True)
+# Generate spiral (Rust-accelerated)
+spiral = SpiralPattern(width=297, height=210, num_revolutions=20)
+spiral.generate(start_radius=5, num_spirals=3)
+spiral.draw(canvas, "main")
 
 # Save
 canvas.save("output.svg")
@@ -54,9 +74,11 @@ canvas.save("output.svg")
 
 ## Pattern Generators
 
-### 1. Dendrite/Branching Patterns
+All pattern classes are thin Python wrappers around Rust implementations. They maintain the same API but execute at Rust speed.
 
-Organic, tree-like or river-like structures using Diffusion-Limited Aggregation (DLA).
+### 1. DendritePattern
+
+Organic branching structures using Diffusion-Limited Aggregation (DLA).
 
 ```python
 from axiart.patterns import DendritePattern
@@ -64,23 +86,19 @@ from axiart.patterns import DendritePattern
 dendrite = DendritePattern(
     width=297,
     height=210,
-    num_particles=2000,
-    attraction_distance=4.0,
-    branching_style="vertical"  # vertical, horizontal, or radial
+    num_particles=5000,
+    attraction_distance=5.0,
+    branching_style="radial"  # radial, vertical, horizontal
 )
-dendrite.generate()
+dendrite.generate(max_attempts=1000)
 dendrite.draw(canvas, "layer_name")
 ```
 
-**Parameters:**
-- `num_particles`: Number of particles to aggregate
-- `attraction_distance`: Distance at which particles stick
-- `branching_style`: "radial", "vertical", or "horizontal"
-- `seed_points`: Custom starting points for growth
+**Performance**: 920 particles/sec (10,000 particles). Handles unlimited particles with O(1) spatial grid hash.
 
-### 2. Spiral Patterns
+### 2. SpiralPattern
 
-Concentric circles and spirals with customizable rotation and decay.
+Archimedean, logarithmic, and concentric spirals.
 
 ```python
 from axiart.patterns import SpiralPattern
@@ -89,52 +107,50 @@ spiral = SpiralPattern(
     width=297,
     height=210,
     num_revolutions=20,
-    spiral_type="archimedean"  # archimedean, logarithmic, or concentric
+    spiral_type="archimedean"  # archimedean, logarithmic, concentric
 )
 
-# Archimedean/logarithmic spirals
+# Generate spirals
 spiral.generate(start_radius=5, num_spirals=3, angular_offset=2.094)
 
-# Concentric circles
+# Circular waves
 spiral.generate_circular_waves(
-    num_circles=20,
-    wave_amplitude=2,
-    wave_frequency=5
+    num_circles=30,
+    wave_amplitude=5.0,
+    wave_frequency=10.0
 )
-
-# Fermat (parabolic) spiral
-spiral.generate_fermat_spiral(num_points=1000, spacing=2.0)
 
 spiral.draw(canvas, "layer_name")
 ```
 
-### 3. Grid Patterns
+**Performance**: 12-20M points/sec.
 
-Geometric grids (square, hexagonal, triangular) with distortion options.
+### 3. GridPattern
+
+Square and hexagonal grids with radial distortion.
 
 ```python
 from axiart.patterns import GridPattern
 
-grid = GridPattern(width=297, height=210, grid_type="hexagonal")
+grid = GridPattern(width=297, height=210)
+
+# Square grid with optional jitter
+grid.generate_square_grid(cell_size=10, jitter=0.5)
 
 # Hexagonal grid
-grid.generate_hexagonal_grid(cell_size=10, fill_cells=True)
+grid.generate_hexagonal_grid(cell_size=10)
 
-# Square grid with jitter
-grid.generate_square_grid(cell_size=15, jitter=1.5)
-
-# Triangular grid
-grid.generate_triangular_grid(cell_size=10)
-
-# Apply distortion
-grid.apply_radial_distortion(strength=0.15)
+# Apply radial distortion
+grid.apply_radial_distortion(center=None, strength=0.5)
 
 grid.draw(canvas, "layer_name")
 ```
 
-### 4. Noise/Texture Fields
+**Performance**: 8-12M points/sec. Supports 2.2M hexagons/sec generation.
 
-Perlin noise-based contours, topographic lines, and stippling.
+### 4. NoisePattern
+
+Perlin noise-based contours, stippling, and textures using marching squares.
 
 ```python
 from axiart.patterns import NoisePattern
@@ -142,29 +158,31 @@ from axiart.patterns import NoisePattern
 noise = NoisePattern(
     width=297,
     height=210,
-    scale=100,      # Larger = smoother
-    octaves=6,      # Detail level
+    scale=100.0,      # Larger = smoother
+    octaves=4,        # Detail layers
     seed=42
 )
 
-# Topographic contour lines
+# Topographic contour lines (marching squares)
 noise.generate_contour_lines(num_levels=30, resolution=2.0)
 
-# Stippling texture
-noise.generate_stippling(num_points=5000, density_map=True, threshold=0.0)
+# Parallel stippling
+noise.generate_stippling(num_points=20000, density_map=True, parallel=True)
 
 # Cellular texture
 noise.generate_cellular_texture(cell_size=5.0, pattern_type="squares")
 
-# Hatching pattern
-noise.generate_hatching(line_spacing=2.0, angle=45, density_modulation=True)
+# Hatching
+noise.generate_hatching(spacing=5.0, line_length=10.0, threshold=0.0)
 
 noise.draw(canvas, "layer_name")
 ```
 
-### 5. Flow Field Patterns
+**Performance**: 12M points/sec (stippling), 1.67M segments/sec (contours). Parallel generation enabled by default.
 
-Vector field-based particle traces creating organic flowing patterns.
+### 5. FlowFieldPattern
+
+Vector field particle tracing with parallel streamline generation.
 
 ```python
 from axiart.patterns import FlowFieldPattern
@@ -172,25 +190,24 @@ from axiart.patterns import FlowFieldPattern
 flow = FlowFieldPattern(
     width=297,
     height=210,
-    field_type="noise",  # noise, radial, spiral, waves, or custom
-    scale=60,
+    field_type="noise",  # noise, radial, spiral, waves
+    scale=50.0,
     seed=42
 )
 
-# Generate streamlines
-flow.generate_streamlines(num_lines=80, steps=250, step_size=1.2)
-
-# Particle system with trails
-flow.generate_particle_system(num_particles=50, steps=300, fade_length=50)
-
-# Grid visualization of vector field
-flow.generate_grid_visualization(grid_spacing=10, arrow_length=5)
+# Parallel streamlines (1.8x speedup on multi-core)
+flow.generate_streamlines(num_lines=100, steps=200, parallel=True)
 
 # Curl noise (divergence-free)
-flow.generate_curl_noise_lines(num_lines=100, steps=200)
+flow.generate_curl_noise_lines(num_lines=100, steps=200, parallel=True)
+
+# Grid visualization
+flow.generate_grid_visualization(grid_resolution=20)
 
 flow.draw(canvas, "layer_name")
 ```
+
+**Performance**: 12.5M points/sec with parallel generation.
 
 ## Composition System
 
@@ -199,14 +216,13 @@ Layer multiple patterns with selective coloring:
 ```python
 from axiart.composition import create_standard_composition, ColorPalette
 
-# Create composition with color palette
+# Create composition with predefined palette
 comp = create_standard_composition(palette=ColorPalette.RED_ACCENT)
 
-# Add patterns to different layers
+# Add patterns to layers
 comp.add_pattern(dendrite_pattern, "primary")
 comp.add_pattern(noise_pattern, "accent")
 
-# Save
 comp.save("output.svg")
 ```
 
@@ -230,12 +246,10 @@ from axiart.composition import Composition
 
 comp = Composition(width=297, height=210, background="white")
 
-# Add custom layers
 comp.add_layer("background", color="#CCCCCC", stroke_width=0.3)
 comp.add_layer("main", color="black", stroke_width=0.5)
 comp.add_layer("accent", color="#D32F2F", stroke_width=0.6)
 
-# Add patterns
 comp.add_pattern(pattern1, "background")
 comp.add_pattern(pattern2, "main")
 comp.add_pattern(pattern3, "accent")
@@ -245,178 +259,155 @@ comp.save("output.svg")
 
 ## Examples
 
-The `examples/` directory contains 10 diverse example scripts:
-
-### Individual Patterns
-
-1. **example_simple_starter.py** - Minimal example with Fermat spiral
-2. **example_dendrite.py** - Tree-like branching structures
-3. **example_spiral.py** - Archimedean spirals and concentric circles
-4. **example_grid.py** - Hexagonal and distorted square grids
-5. **example_noise.py** - Topographic contours and stippling
-6. **example_flow.py** - Flow field streamlines
-
-### Mixed Compositions
-
-7. **example_mixed_organic.py** - Organic theme (dendrites + flow + noise)
-8. **example_mixed_geometric.py** - Geometric theme (grids + spirals + flow)
-9. **example_mixed_landscape.py** - Landscape theme (contours + trees + sun)
-10. **example_showcase.py** - Comprehensive showcase of all patterns
+The `examples/` directory contains example scripts demonstrating individual patterns and complex compositions.
 
 ### Running Examples
 
 ```bash
 cd examples
 uv run python example_simple_starter.py
+uv run python example_abstract_character.py
 uv run python example_mixed_landscape.py
-# etc.
 ```
 
-All examples generate SVG files in the `examples/` directory with the prefix `output_`.
+All examples generate SVG files in the `examples/` directory.
 
 ## AxiDraw Compatibility
 
 All generated SVGs are optimized for AxiDraw V3:
 
-- **Units**: Default to mm (A4 size: 297×210mm)
-- **Clean vectors**: No bitmap data, only lines and curves
-- **Stroke-based**: All paths use strokes, not fills (except stippling)
+- **Units**: millimeters (default A4: 297x210mm)
+- **Clean vectors**: Lines and curves only, no bitmap data
+- **Stroke-based**: All paths use strokes (except stippling points)
 - **Layer organization**: Multiple layers for pen changes
-- **Optimal stroke width**: Default 0.5mm suitable for most pens
+- **Default stroke width**: 0.5mm
 
-### Plotting Tips
-
-1. **Import to Inkscape** for final adjustments
-2. **Use AxiDraw extension** to preview pen paths
-3. **Layer order**: Background layers plot first
-4. **Pen changes**: Use layers for different colored pens
-5. **Test plots**: Start with simple examples before complex compositions
-
-## Advanced Usage
-
-### Custom Vector Fields
+### Common Canvas Sizes
 
 ```python
-flow = FlowFieldPattern(width=297, height=210, field_type="custom")
+# A4 (default)
+canvas = SVGCanvas(width=297, height=210)
 
-# Define custom field function
-def my_field(x, y):
-    dx = np.sin(y / 20)
-    dy = np.cos(x / 20)
-    return dx, dy
+# A3
+canvas = SVGCanvas(width=420, height=297)
 
-flow.set_custom_field(my_field)
-flow.generate_streamlines(num_lines=50, steps=200)
+# Letter
+canvas = SVGCanvas(width=279.4, height=215.9)
 ```
 
-### Custom Grid Distortions
+## Accessing Raw Data
+
+All patterns provide methods to access generated geometry:
 
 ```python
-grid = GridPattern(width=297, height=210)
-grid.generate_square_grid(cell_size=10)
-
-# Define custom distortion
-def wave_distortion(x, y):
-    new_x = x + 5 * np.sin(y / 20)
-    new_y = y + 5 * np.cos(x / 20)
-    return new_x, new_y
-
-grid.apply_distortion(wave_distortion)
-```
-
-### Accessing Raw Data
-
-All patterns provide methods to access generated data:
-
-```python
-# Get dendrite points and lines
+# Dendrite
 points = dendrite.get_points()
 lines = dendrite.get_lines()
 
-# Get spiral paths
+# Spiral
 spirals = spiral.get_spirals()
 
-# Get grid elements
+# Grid
 grid_lines = grid.get_lines()
-grid_cells = grid.get_cells()
 
-# Get noise contours
-contours = noise.get_contours()
+# Noise
+contour_lines = noise.get_lines()
 stipple_points = noise.get_points()
 
-# Get flow field paths
+# Flow field
 flow_paths = flow.get_paths()
 ```
 
-## Canvas Dimensions
+## Rust Acceleration Architecture
 
-Common AxiDraw plotting sizes (in mm):
+AxiArt uses Rust for all computationally expensive pattern generation:
 
-- **A4**: 297 × 210 (default)
-- **A3**: 420 × 297
-- **Letter**: 279.4 × 215.9
-- **Custom**: Any size supported by your AxiDraw model
+- **Custom spatial grid hash** for O(1) nearest neighbor queries (dendrites)
+- **Parallel streamline generation** using rayon (flow fields)
+- **Marching squares** for contour extraction (noise patterns)
+- **SIMD-optimized geometry** for grid and spiral generation
+- **Zero-copy NumPy integration** via PyO3
 
-```python
-# A3 canvas
-canvas = SVGCanvas(width=420, height=297)
-```
+Python pattern classes are thin wrappers that:
+1. Initialize Rust generators
+2. Pass parameters to Rust
+3. Receive computed geometry
+4. Provide drawing methods
 
-## Performance Tips
+If Rust library is not built, initialization will fail with clear instructions.
 
-- **Dendrites**: Reduce `num_particles` for faster generation
-- **Flow fields**: Reduce `num_lines` and `steps` for simpler patterns
-- **Noise contours**: Increase `resolution` to reduce detail
-- **Stippling**: Fewer points = faster generation
+See `RUST_PERFORMANCE.md` for comprehensive benchmarks, API reference, and architecture details.
+
+## Performance Considerations
+
+Pattern generation is extremely fast due to Rust acceleration:
+
+- **DendritePattern**: 10,000 particles in ~11 seconds
+- **FlowFieldPattern**: 1,000 streamlines (200 steps each) in ~0.016 seconds
+- **NoisePattern**: 50,000 stipple points in ~0.004 seconds
+- **GridPattern**: 3,000 hexagons in ~0.0014 seconds
+- **SpiralPattern**: 500,000 points in ~0.04 seconds
+
+All patterns support unlimited complexity with no capacity limits.
 
 ## Project Structure
 
 ```
 axiart/
-├── pyproject.toml          # Project dependencies
-├── README.md               # This file
+├── pyproject.toml           # Project configuration
+├── README.md                # This file
+├── RUST_PERFORMANCE.md      # Detailed benchmarks and architecture
+├── CLAUDE.md                # Development guidance
 ├── axiart/
 │   ├── __init__.py
-│   ├── svg_exporter.py     # SVG canvas and export
-│   ├── composition.py      # Layer composition system
-│   └── patterns/
+│   ├── svg_exporter.py      # SVG canvas and export
+│   ├── composition.py       # Layer composition system
+│   ├── shapes.py            # Geometric primitives
+│   └── patterns/            # Pattern generators (Python wrappers)
 │       ├── __init__.py
-│       ├── dendrite.py     # DLA branching patterns
-│       ├── spiral.py       # Spiral generators
-│       ├── grid.py         # Grid patterns
-│       ├── noise.py        # Perlin noise patterns
-│       └── flow_field.py   # Vector field patterns
-└── examples/               # 10 example scripts
-    ├── example_simple_starter.py
-    ├── example_dendrite.py
-    ├── example_spiral.py
-    ├── example_grid.py
-    ├── example_noise.py
-    ├── example_flow.py
-    ├── example_mixed_organic.py
-    ├── example_mixed_geometric.py
-    ├── example_mixed_landscape.py
-    └── example_showcase.py
+│       ├── dendrite.py      # DLA branching (Rust)
+│       ├── spiral.py        # Spirals (Rust)
+│       ├── grid.py          # Grids (Rust)
+│       ├── noise.py         # Noise patterns (Rust)
+│       └── flow_field.py    # Flow fields (Rust)
+├── axiart-core/             # Rust acceleration library
+│   ├── Cargo.toml
+│   └── src/
+│       ├── lib.rs           # PyO3 module definition
+│       ├── dendrite.rs      # Spatial grid hash DLA (328 lines)
+│       ├── noise_core.rs    # Perlin noise with fBm (140 lines)
+│       ├── flow_field.rs    # Parallel streamlines (357 lines)
+│       ├── noise_pattern.rs # Marching squares (357 lines)
+│       ├── spiral.rs        # Geometric spirals (194 lines)
+│       └── grid.rs          # Grid generation (153 lines)
+├── examples/                # Example scripts
+└── test_*.py                # Benchmark scripts
+```
+
+## Development
+
+```bash
+# Build Rust library in development mode
+uv run maturin develop
+
+# Build optimized release version
+uv run maturin develop --release
+
+# Format Python code
+uv run black axiart/
+
+# Run benchmarks
+uv run python test_final_dendrite.py
+uv run python test_flowfield.py
+uv run python test_noisepattern.py
+uv run python test_spiral.py
+uv run python test_grid.py
 ```
 
 ## License
 
-This project is open source. Feel free to use, modify, and distribute.
+Open source. Free to use, modify, and distribute.
 
 ## Credits
 
-Inspired by the generative art community and optimized for AxiDraw V3 pen plotters by Evil Mad Scientist Laboratories.
-
-## Contributing
-
-Contributions welcome! Some ideas for extensions:
-
-- Additional pattern generators (Voronoi, reaction-diffusion, L-systems)
-- More color palettes
-- Animation/sequence generation
-- Integration with plotting libraries
-- Performance optimizations
-
----
-
-Happy plotting! 🎨🖊️
+Optimized for AxiDraw V3 pen plotters by Evil Mad Scientist Laboratories.
