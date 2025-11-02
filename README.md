@@ -272,6 +272,37 @@ uv run python example_mixed_landscape.py
 
 All examples generate SVG files in the `examples/` directory.
 
+### Hyperrealistic Portraits
+
+AxiArt can create highly detailed algorithmic portraits using maximum-density techniques:
+
+```bash
+cd examples
+uv run python example_portrait_trevor_detailed.py
+```
+
+**Techniques used:**
+- **58,000 stipple points** for smooth skin gradients (3-layer progressive shading)
+- **5,800 dendrite particles** for realistic hair and beard texture
+- **45 contour levels** for facial structure and depth
+- **Multi-directional cross-hatching** for fabric volume
+- **Fine stroke widths** (0.12-0.42mm) for detail precision
+
+**Detail density:**
+- Beard: 2,000 dendrite particles with dual-layer branching
+- Hair: 2,400 particles across left/right clusters
+- Skin: 50,000 points across 3 stippling layers (light/mid/shadow)
+- Eyes: Detailed structures with eyelids and reflections
+- Glasses: Geometric frames with highlights
+
+This demonstrates the system's capability for **maximum realism within line-based pen plotting constraints**. The portrait combines:
+- Filled geometric shapes (face, glasses, clothing)
+- Organic dendrite textures (hair, beard)
+- Noise-based gradients (skin shading)
+- Anatomically accurate feature placement
+
+**Note**: This is algorithmic realism optimized for pen plotting, not photographic rendering. All detail is created through line density, stippling, and branching patterns.
+
 ## AxiDraw Compatibility
 
 All generated SVGs are optimized for AxiDraw V3:
