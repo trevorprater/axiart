@@ -14,7 +14,7 @@ def main():
 
     # Generate hexagonal grid
     grid1 = GridPattern(width=297, height=210, grid_type="hexagonal")
-    grid1.generate_hexagonal_grid(cell_size=10, fill_cells=True)
+    grid1.generate_hexagonal_grid(cell_size=10)
     comp.add_pattern(grid1, "primary")
 
     # Generate distorted square grid as accent

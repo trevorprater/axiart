@@ -20,7 +20,7 @@ def main():
 
     # Primary: hatching for shading
     hatching = NoisePattern(width=297, height=210, scale=60, seed=600)
-    hatching.generate_hatching(line_spacing=3.0, angle=45, density_modulation=True)
+    hatching.generate_hatching(spacing=3.0, line_length=10.0, threshold=0.0)
     comp.add_pattern(hatching, "primary")
 
     # Accent 1: tree-like dendrites

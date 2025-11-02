@@ -14,7 +14,7 @@ def main():
 
     # Background: distorted grid
     grid = GridPattern(width=297, height=210)
-    grid.generate_square_grid(cell_size=20, draw_horizontal=True, draw_vertical=True)
+    grid.generate_square_grid(cell_size=20)
     grid.apply_radial_distortion(strength=0.2)
     comp.add_pattern(grid, "background")
 
