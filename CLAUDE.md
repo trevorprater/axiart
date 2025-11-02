@@ -8,12 +8,23 @@ AxiArt is a generative art system for creating algorithmic artwork optimized for
 
 ## Development Commands
 
-This project uses [uv](https://docs.astral.sh/uv/) for dependency management.
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management and requires building Rust acceleration libraries.
 
 ### Installation
 ```bash
-uv sync
+uv sync                              # Install Python dependencies
+uv run maturin develop --release     # Build Rust acceleration library (REQUIRED)
 ```
+
+**CRITICAL**: The Rust library (`axiart_core`) must be built before running any examples. All pattern generators are pure Rust wrappers - they will fail with clear error messages if the Rust library is not built.
+
+### Building Rust Library
+```bash
+uv run maturin develop               # Development build (faster compile)
+uv run maturin develop --release     # Release build (optimized, use for benchmarks)
+```
+
+After modifying Rust code in `axiart-core/src/`, rebuild with the appropriate command.
 
 ### Running Examples
 ```bash
@@ -21,17 +32,22 @@ cd examples
 uv run python example_simple_starter.py      # Basic spiral example
 uv run python example_abstract_character.py  # Complex artistic composition
 uv run python example_mixed_landscape.py     # Multi-pattern landscape
-uv run python example_showcase.py            # All patterns in one
+uv run python example_portrait_trevor_detailed.py  # Hyperrealistic portrait (58k stipple points)
+```
+
+### Running Benchmarks
+```bash
+uv run python test_dendrite.py       # Benchmark dendrite DLA (10k particles)
+uv run python test_spiral.py         # Benchmark spiral generation
+uv run python test_grid.py           # Benchmark grid patterns
+uv run python test_flowfield.py      # Benchmark flow fields
+uv run python test_noisepattern.py   # Benchmark noise patterns
 ```
 
 ### Code Formatting
 ```bash
-uv run black axiart/                  # Format all code (line-length: 100)
-```
-
-### Testing (if pytest is installed)
-```bash
-uv run pytest                         # Run tests if they exist
+uv run black axiart/                 # Format Python code (line-length: 100)
+cargo fmt --manifest-path axiart-core/Cargo.toml  # Format Rust code
 ```
 
 ## Architecture
@@ -50,40 +66,59 @@ uv run pytest                         # Run tests if they exist
 - Patterns are added to specific layers via `comp.add_pattern(pattern, "layer_name")`
 - Access underlying canvas with `comp.get_canvas()` for direct drawing
 
-**Pattern Generators** (`axiart/patterns/`)
+**Pattern Generators** (`axiart/patterns/`) - **Pure Rust Wrappers**
+- **CRITICAL**: All pattern generators are thin Python wrappers around Rust implementations
+- **No fallback**: If Rust library is not built, imports will fail with helpful error messages
+- **Zero Python implementation**: All computation happens in Rust for 10-300x speedup
 - Each pattern class follows the same interface:
-  1. Initialize with canvas dimensions and parameters
-  2. Call a `generate_*()` method to compute the pattern
+  1. Initialize with canvas dimensions and parameters (creates Rust generator)
+  2. Call a `generate_*()` method to compute the pattern (delegates to Rust)
   3. Call `.draw(canvas, layer_name)` to render to canvas
   4. Optionally call `.get_points()`, `.get_lines()`, etc. for raw data
 - Patterns store computed geometry internally and can be drawn multiple times
+- See `RUST_PERFORMANCE.md` for detailed performance characteristics
 
 **Shapes System** (`axiart/shapes.py`)
 - Basic geometric shapes: `Circle`, `Rectangle`, `Polygon`
 - `add_filled_shape()` helper for creating filled shapes with strokes
 - Shapes can be filled with color (critical for artistic compositions)
 
-### Pattern Types
+### Pattern Types (All Rust-Accelerated)
 
 1. **DendritePattern** - Organic branching structures using Diffusion-Limited Aggregation (DLA)
+   - **Performance**: 920 particles/sec (10,000 particles in 10.8s)
+   - **Implementation**: Custom spatial grid hash for O(1) nearest neighbor lookup
    - Branching styles: `"radial"`, `"vertical"`, `"horizontal"`
    - Controlled by `num_particles`, `attraction_distance`, `seed_points`
+   - No capacity limits - tested with 10,000+ particles
+   - Use for: hair, beards, trees, organic textures
 
 2. **SpiralPattern** - Spirals and concentric circles
+   - **Performance**: 12-20M points/sec
    - Types: Archimedean, logarithmic, Fermat (parabolic), circular waves
-   - Each type has a different `generate_*()` method
+   - Methods: `generate()`, `generate_fermat_spiral()`, `generate_circular_waves()`
+   - Use for: focal points, phyllotaxis patterns, ripples
 
 3. **GridPattern** - Geometric grids with optional distortion
-   - Grid types: square, hexagonal, triangular
-   - Apply distortions: `apply_radial_distortion()`, custom functions
+   - **Performance**: 8-12M points/sec, 2.2M hexagons/sec
+   - Grid types: square, hexagonal
+   - Apply distortions: `apply_radial_distortion()`, `apply_jitter()`
+   - Custom distortions: Get data with `.get_lines()`, transform in Python, draw manually
+   - Use for: backgrounds, structure, computational substrates
 
-4. **NoisePattern** - Perlin noise-based textures
+4. **NoisePattern** - Perlin noise-based textures using marching squares
+   - **Performance**: 12M points/sec (stippling), 1.67M segments/sec (contours)
    - Outputs: contour lines, stippling, cellular texture, hatching
    - Controlled by `scale` (smoothness) and `octaves` (detail)
+   - Parallel generation enabled by default
+   - Use for: shading, skin texture, organic backgrounds, topographic effects
 
-5. **FlowFieldPattern** - Vector field particle tracing
-   - Field types: `"noise"`, `"radial"`, `"spiral"`, `"waves"`, `"custom"`
-   - Outputs: streamlines, particle systems, grid visualization, curl noise
+5. **FlowFieldPattern** - Vector field particle tracing with parallel generation
+   - **Performance**: 12.5M points/sec with parallel streamlines
+   - Field types: `"noise"`, `"radial"`, `"spiral"`, `"waves"`
+   - Outputs: streamlines, curl noise (divergence-free), grid visualization
+   - Parallel generation: 1.8x speedup on multi-core systems
+   - Use for: movement, energy flows, atmospheric effects
 
 ### Workflow: From Patterns to Art
 
@@ -139,38 +174,117 @@ Predefined palettes in `composition.py`:
 - `ColorPalette.MONO`, `RED_ACCENT`, `BLUE_ACCENT`, `GOLD_ACCENT`, etc.
 - Use with `create_standard_composition(palette=ColorPalette.RED_ACCENT)`
 
-### Example Patterns
-- Simple patterns: `example_dendrite.py`, `example_spiral.py`, etc.
-- Artistic compositions: `example_abstract_character.py`, `example_portrait.py`
-- The artistic examples demonstrate proper layer usage, filled shapes, and pattern constraining
+### Example Categories
+
+**Simple Pattern Demonstrations**:
+- `example_dendrite.py`, `example_spiral.py`, `example_grid.py`, etc.
+- Each demonstrates a single pattern type with basic parameters
+
+**Artistic Compositions**:
+- `example_abstract_character.py` - Combining filled shapes with patterns (faces, eyes)
+- `example_mixed_landscape.py` - Multi-pattern landscape composition
+- Demonstrate proper layer usage, filled shapes, and pattern constraining
+
+**Self-Portraits** (Algorithmic/Abstract):
+- `example_self_portrait_claude.py` - Neural Landscape (dual-hemisphere, 11 layers)
+- `example_self_portrait_mandala.py` - 8-fold radial symmetry with rotational duplication
+- `example_self_portrait_flow.py` - Vertical flowing process (no spirals)
+- Demonstrate region-constrained patterns, rotational transforms, custom filtering
+
+**Human Portraits** (Hyperrealistic):
+- `example_portrait_trevor.py` - Basic algorithmic portrait (3k stipple points)
+- `example_portrait_trevor_detailed.py` - Maximum detail (58k stipple, 5.8k dendrites)
+- Demonstrate filled shapes + organic textures, multi-layer stippling, anatomical positioning
+
+**Advanced Techniques**:
+- `example_warped_space.py` - Gravitational lens with multiple distortion strengths
+- Demonstrates distortion techniques and visual effects
 
 ## File Organization
 
 ```
 axiart/
-├── axiart/                  # Main package
+├── axiart/                  # Main Python package
 │   ├── svg_exporter.py      # SVGCanvas - low-level canvas
 │   ├── composition.py       # Composition - high-level layer system
 │   ├── shapes.py            # Geometric shapes with fills
-│   └── patterns/            # Pattern generators
-│       ├── dendrite.py      # DLA branching
-│       ├── spiral.py        # Spirals and circles
-│       ├── grid.py          # Geometric grids
-│       ├── noise.py         # Perlin noise patterns
-│       └── flow_field.py    # Vector field patterns
-├── examples/                # Example scripts (10 total)
+│   └── patterns/            # Pattern generators (Python wrappers)
+│       ├── dendrite.py      # DLA branching (Rust wrapper)
+│       ├── spiral.py        # Spirals and circles (Rust wrapper)
+│       ├── grid.py          # Geometric grids (Rust wrapper)
+│       ├── noise.py         # Perlin noise patterns (Rust wrapper)
+│       └── flow_field.py    # Vector field patterns (Rust wrapper)
+├── axiart-core/             # Rust acceleration library
+│   ├── Cargo.toml           # Rust dependencies
+│   └── src/
+│       ├── lib.rs           # PyO3 module definition
+│       ├── dendrite.rs      # Spatial grid hash DLA
+│       ├── noise_core.rs    # Perlin noise with fBm
+│       ├── flow_field.rs    # Parallel streamlines
+│       ├── noise_pattern.rs # Marching squares
+│       ├── spiral.rs        # Geometric spirals
+│       └── grid.rs          # Grid generation
+├── examples/                # Example scripts (16 total)
+├── test_*.py                # Performance benchmark scripts
 ├── README.md                # User documentation
-├── ARTISTIC_GUIDE.md        # Artistic composition techniques
-└── pyproject.toml           # Dependencies and config
+├── RUST_PERFORMANCE.md      # Detailed benchmarks and architecture
+├── ARTISTIC_GUIDE.md        # Artistic composition techniques (if exists)
+├── CLAUDE.md                # This file
+└── pyproject.toml           # Build system + dependencies (Maturin)
 ```
+
+## Rust Acceleration Architecture
+
+**All pattern generation is implemented in Rust** via PyO3 bindings compiled with Maturin.
+
+### Key Technical Details
+
+**Python Wrappers Are Minimal**:
+- Python pattern classes (e.g., `DendritePattern`) are thin wrappers
+- On `__init__`, they create a Rust generator object (e.g., `_RustDendriteGenerator`)
+- All `generate_*()` methods delegate directly to Rust
+- No Python fallback exists - if Rust library isn't built, imports fail immediately
+
+**Rust Module Structure** (`axiart-core/src/`):
+- `lib.rs` - PyO3 module definition, exports all generators
+- `dendrite.rs` - Spatial grid hash DLA (328 lines)
+- `noise_core.rs` - Perlin noise with fBm (140 lines)
+- `flow_field.rs` - Parallel streamlines using rayon (357 lines)
+- `noise_pattern.rs` - Marching squares for contours (357 lines)
+- `spiral.rs` - Geometric spiral generation (232 lines)
+- `grid.rs` - Grid generation with distortion (153 lines)
+
+**Performance Characteristics**:
+- **100-300x speedup** for dendrite generation (spatial hash vs Python loops)
+- **5-20x speedup** for flow fields (parallel rayon + Rust speed)
+- **2-5x speedup** for grids and spirals (Rust geometric calculations)
+- **No capacity limits** - tested with 10,000+ dendrite particles, 50,000+ stipple points
+
+**Why No Fallback**:
+The previous architecture had Python implementations with `_RUST_AVAILABLE` checks. This was removed because:
+1. Maintaining duplicate Python/Rust implementations was error-prone
+2. Performance difference was too large (100-300x) to justify fallback
+3. Rust library build is required anyway via `pyproject.toml` build system
+4. Clear error messages guide users to run `maturin develop --release`
+
+**When Adding New Patterns**:
+1. Implement in Rust first (`axiart-core/src/`)
+2. Export via PyO3 in `lib.rs`
+3. Create Python wrapper in `axiart/patterns/`
+4. Wrapper should only: initialize Rust generator, delegate method calls, provide `.draw()`
+5. Rebuild Rust library: `uv run maturin develop --release`
 
 ## Dependencies
 
-Core: `numpy`, `svgwrite`, `noise`, `scipy`
+**Runtime**:
+- Python >= 3.9
+- svgwrite >= 1.4.3
 
-Development: `pytest`, `black` (both optional)
+**Build** (handled by Maturin):
+- Rust toolchain (automatically installed)
+- Maturin >= 1.7
 
-Python >= 3.9 required
+**Important**: `numpy`, `noise`, and `scipy` are **no longer required** for pattern generation - all computation is in Rust. They remain as dependencies only for backwards compatibility with existing examples.
 
 ## Design Philosophy
 
