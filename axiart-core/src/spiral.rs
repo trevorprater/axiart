@@ -190,4 +190,42 @@ impl SpiralGenerator {
 
         Ok(circles)
     }
+
+    /// Generate Fermat (parabolic) spiral pattern
+    ///
+    /// Uses golden angle rotation for natural phyllotaxis pattern.
+    /// Commonly used for sunflower seed patterns.
+    ///
+    /// # Arguments
+    /// * `num_points` - Number of points to generate
+    /// * `spacing` - Spacing multiplier between points
+    /// * `rotation` - Rotation offset in radians
+    ///
+    /// # Returns
+    /// Single spiral as Vec<Vec<(f64, f64)>>
+    #[pyo3(signature = (num_points=1000, spacing=2.0, rotation=0.0))]
+    fn generate_fermat_spiral(
+        &self,
+        num_points: usize,
+        spacing: f64,
+        rotation: f64,
+    ) -> PyResult<Vec<Vec<(f64, f64)>>> {
+        let golden_angle = PI * (3.0 - 5.0_f64.sqrt()); // ≈ 2.39996 radians (≈ 137.5°)
+        let mut points = Vec::with_capacity(num_points);
+
+        for i in 0..num_points {
+            let theta = (i as f64) * golden_angle + rotation;
+            let r = spacing * (i as f64).sqrt();
+
+            let x = self.center.0 + r * theta.cos();
+            let y = self.center.1 + r * theta.sin();
+
+            // Only include points within canvas bounds
+            if x >= 0.0 && x <= self.width && y >= 0.0 && y <= self.height {
+                points.push((x, y));
+            }
+        }
+
+        Ok(vec![points])
+    }
 }

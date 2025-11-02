@@ -121,6 +121,29 @@ class SpiralPattern:
             wave_frequency=wave_frequency
         )
 
+    def generate_fermat_spiral(
+        self,
+        num_points: int = 1000,
+        spacing: float = 2.0,
+        rotation: float = 0
+    ):
+        """
+        Generate a Fermat (parabolic) spiral pattern.
+
+        Uses golden angle rotation for natural phyllotaxis patterns
+        (sunflower seed arrangement).
+
+        Args:
+            num_points: Number of points
+            spacing: Spacing between points
+            rotation: Rotation offset in radians
+        """
+        self.spirals = self._generator.generate_fermat_spiral(
+            num_points=num_points,
+            spacing=spacing,
+            rotation=rotation
+        )
+
     def draw(self, canvas: SVGCanvas, layer: str, as_points: bool = False):
         """
         Draw the spiral pattern on the canvas.
