@@ -1,13 +1,12 @@
-"""SVG Canvas and exporter for AxiDraw-compatible artwork."""
+"""SVG Canvas and exporter for pen plotters."""
 
 import svgwrite
 from typing import List, Tuple, Optional, Union
-import numpy as np
 
 
 class SVGCanvas:
     """
-    A canvas for creating SVG artwork optimized for AxiDraw pen plotting.
+    A canvas for creating SVG artwork optimized for pen plotters.
 
     Supports multiple layers, selective coloring, and clean vector output.
     """

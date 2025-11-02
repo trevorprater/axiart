@@ -2,6 +2,7 @@
 name = "axiart-core"
 version = "0.1.0"
 edition = "2021"
+authors = ["Trevor Prater"]
 
 [lib]
 name = "axiart_core"
