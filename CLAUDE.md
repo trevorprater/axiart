@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AxiArt is a generative art system for creating algorithmic artwork optimized for the AxiDraw V3 pen plotter. It uses a modular, layer-based composition system where patterns are generated algorithmically and then combined on an SVG canvas.
+AxiArt is a generative art system for creating algorithmic artwork optimized for pen plotters. It uses a modular, layer-based composition system where patterns are generated algorithmically and then combined on an SVG canvas.
 
 ## Development Commands
 
@@ -161,7 +161,7 @@ comp.add_layer("details", color="black")        # Top layer
 - Default: A4 paper in mm (297×210)
 - Origin: Top-left (0, 0)
 - All dimensions in millimeters by default
-- AxiDraw V3 compatible: max plotting area depends on model
+- Pen plotter compatible: max plotting area depends on specific hardware
 
 ### Direct SVG Manipulation
 For advanced use, access the underlying `svgwrite.Drawing` object:

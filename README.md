@@ -1,6 +1,6 @@
-# AxiArt - Generative Art for AxiDraw V3
+# AxiArt - Generative Art for Pen Plotters
 
-A high-performance Python/Rust system for creating algorithmic art optimized for the AxiDraw V3 pen plotter. Generate plottable SVG artwork with dendrites, spirals, grids, noise fields, and flow patterns.
+A high-performance Python/Rust system for creating algorithmic art optimized for pen plotters. Generate plottable SVG artwork with dendrites, spirals, grids, noise fields, and flow patterns.
 
 **Performance**: Pattern generation accelerated 10-300x using Rust implementations with zero capacity limits.
 
@@ -8,7 +8,7 @@ A high-performance Python/Rust system for creating algorithmic art optimized for
 
 - **6 Rust-accelerated pattern generators**: Dendrites, spirals, grids, noise fields, flow fields, and Perlin noise
 - **High performance**: 8-20M points/sec generation speed depending on pattern type
-- **SVG export**: Clean vector output optimized for AxiDraw pen plotting
+- **SVG export**: Clean vector output optimized for pen plotters
 - **Composable system**: Layer multiple patterns with selective coloring
 - **Production-ready**: Tested with 10,000+ particles, extreme configurations
 
@@ -303,9 +303,9 @@ This demonstrates the system's capability for **maximum realism within line-base
 
 **Note**: This is algorithmic realism optimized for pen plotting, not photographic rendering. All detail is created through line density, stippling, and branching patterns.
 
-## AxiDraw Compatibility
+## Pen Plotter Compatibility
 
-All generated SVGs are optimized for AxiDraw V3:
+All generated SVGs are optimized for pen plotters:
 
 - **Units**: millimeters (default A4: 297x210mm)
 - **Clean vectors**: Lines and curves only, no bitmap data
@@ -441,4 +441,4 @@ Open source. Free to use, modify, and distribute.
 
 ## Credits
 
-Optimized for AxiDraw V3 pen plotters by Evil Mad Scientist Laboratories.
+Optimized for pen plotters. Compatible with AxiDraw and other SVG-based pen plotting systems.
