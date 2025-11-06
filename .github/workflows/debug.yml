@@ -1,0 +1,61 @@
+name: Debug Build
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  minimal-build:
+    name: Minimal Build Test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: axiart-core
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Check Rust code compiles
+      run: |
+        cd axiart-core
+        cargo check --verbose
+        echo "Rust compilation successful"
+
+    - name: Install dependencies and build with maturin
+      run: |
+        uv venv
+        uv pip install numpy svgwrite maturin
+        uv run maturin develop --release
+        echo "Maturin build successful"
+
+    - name: Test imports
+      run: |
+        uv run python -c "
+        print('Testing imports...')
+        from axiart.patterns import VoronoiPattern, LSystemPattern, TruchetPattern
+        print('All imports successful')
+        "
+
+    - name: Test basic generation
+      run: |
+        uv run python -c "
+        from axiart.patterns import VoronoiPattern
+        v = VoronoiPattern(width=100, height=100, num_sites=5, seed=42)
+        v.generate()
+        print(f'Generated Voronoi with {len(v.get_sites())} sites')
+        "

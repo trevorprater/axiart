@@ -46,11 +46,7 @@ impl GridGenerator {
 
     /// Generate square grid
     #[pyo3(signature = (cell_size=10.0, jitter=0.0))]
-    fn generate_square_grid(
-        &self,
-        cell_size: f64,
-        jitter: f64,
-    ) -> PyResult<Vec<Vec<(f64, f64)>>> {
+    fn generate_square_grid(&self, cell_size: f64, jitter: f64) -> PyResult<Vec<Vec<(f64, f64)>>> {
         let mut lines = Vec::new();
 
         // Vertical lines

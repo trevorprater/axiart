@@ -33,6 +33,9 @@ uv run python example_simple_starter.py      # Basic spiral example
 uv run python example_abstract_character.py  # Complex artistic composition
 uv run python example_mixed_landscape.py     # Multi-pattern landscape
 uv run python example_portrait_trevor_detailed.py  # Hyperrealistic portrait (58k stipple points)
+uv run python example_voronoi.py             # Voronoi diagrams (cellular patterns)
+uv run python example_lsystem.py             # L-Systems (fractals and plants)
+uv run python example_truchet.py             # Truchet tiles (geometric patterns)
 ```
 
 ### Running Benchmarks
@@ -42,6 +45,9 @@ uv run python test_spiral.py         # Benchmark spiral generation
 uv run python test_grid.py           # Benchmark grid patterns
 uv run python test_flowfield.py      # Benchmark flow fields
 uv run python test_noisepattern.py   # Benchmark noise patterns
+uv run python test_voronoi.py        # Benchmark Voronoi diagrams
+uv run python test_lsystem.py        # Benchmark L-Systems
+uv run python test_truchet.py        # Benchmark Truchet tiles
 ```
 
 ### Code Formatting
@@ -120,6 +126,27 @@ cargo fmt --manifest-path axiart-core/Cargo.toml  # Format Rust code
    - Parallel generation: 1.8x speedup on multi-core systems
    - Use for: movement, energy flows, atmospheric effects
 
+6. **VoronoiPattern** - Cellular patterns using Voronoi diagrams
+   - **Performance**: High-performance sampling-based edge detection
+   - Supports Lloyd's relaxation for uniform cell distribution
+   - Parameters: `num_sites`, `relaxation_iterations`, `sampling_resolution`
+   - Outputs: sites (cell centers) and edges (cell boundaries)
+   - Use for: organic textures, stained glass effects, cellular patterns, natural divisions
+
+7. **LSystemPattern** - Fractal patterns using Lindenmayer systems
+   - **Performance**: High-speed string expansion and turtle graphics interpretation
+   - Presets: Koch curve, Sierpinski triangle, Dragon curve, Hilbert curve, plant variants
+   - Custom rules: Define your own axiom and replacement rules
+   - Turtle commands: F/G (forward), +/- (turn), [ ] (push/pop state)
+   - Use for: plants, trees, fractals, organic growth, space-filling curves
+
+8. **TruchetPattern** - Geometric tiling patterns with rotated tiles
+   - **Performance**: High-speed tile generation with flexible patterns
+   - Tile types: `"diagonal"`, `"arc"`, `"double_arc"`, `"triangle"`, `"maze"`
+   - Parameters: `grid_size`, `randomness` (0.0=structured, 1.0=random), `arc_segments`
+   - Outputs: lines (for diagonal/triangle/maze) or curves (for arc-based tiles)
+   - Use for: geometric backgrounds, maze-like patterns, flowing curves, structured chaos
+
 ### Workflow: From Patterns to Art
 
 The system is designed around **intentional artistic composition**, not just pattern demonstration:
@@ -128,9 +155,12 @@ The system is designed around **intentional artistic composition**, not just pat
 2. **Add Filled Shapes** - Use `shapes.py` to create colored geometric forms (faces, bodies, etc.)
 3. **Layer Patterns with Purpose** - Each pattern serves a compositional role:
    - Grids → background structure
+   - Voronoi → cellular textures, natural divisions
    - Spirals → focal points (eyes, centers)
    - Flow fields → texture and movement
    - Dendrites → organic growth (hair, trees)
+   - L-Systems → plants, fractals, branching structures
+   - Truchet → geometric backgrounds, emergent patterns
    - Noise → shading and depth
 4. **Strategic Color Use** - Mostly black + 1-2 accent colors
 5. **Constrain Patterns to Regions** - Filter pattern outputs to specific areas
@@ -178,6 +208,7 @@ Predefined palettes in `composition.py`:
 
 **Simple Pattern Demonstrations**:
 - `example_dendrite.py`, `example_spiral.py`, `example_grid.py`, etc.
+- `example_voronoi.py`, `example_lsystem.py`, `example_truchet.py`
 - Each demonstrates a single pattern type with basic parameters
 
 **Artistic Compositions**:
@@ -213,7 +244,10 @@ axiart/
 │       ├── spiral.py        # Spirals and circles (Rust wrapper)
 │       ├── grid.py          # Geometric grids (Rust wrapper)
 │       ├── noise.py         # Perlin noise patterns (Rust wrapper)
-│       └── flow_field.py    # Vector field patterns (Rust wrapper)
+│       ├── flow_field.py    # Vector field patterns (Rust wrapper)
+│       ├── voronoi.py       # Voronoi diagrams (Rust wrapper)
+│       ├── lsystem.py       # L-Systems (Rust wrapper)
+│       └── truchet.py       # Truchet tiles (Rust wrapper)
 ├── axiart-core/             # Rust acceleration library
 │   ├── Cargo.toml           # Rust dependencies
 │   └── src/
@@ -223,8 +257,11 @@ axiart/
 │       ├── flow_field.rs    # Parallel streamlines
 │       ├── noise_pattern.rs # Marching squares
 │       ├── spiral.rs        # Geometric spirals
-│       └── grid.rs          # Grid generation
-├── examples/                # Example scripts (16 total)
+│       ├── grid.rs          # Grid generation
+│       ├── voronoi.rs       # Voronoi diagrams with Lloyd's relaxation
+│       ├── lsystem.rs       # L-System string expansion and turtle interpretation
+│       └── truchet.rs       # Truchet tile generation
+├── examples/                # Example scripts (19 total)
 ├── test_*.py                # Performance benchmark scripts
 ├── README.md                # User documentation
 ├── RUST_PERFORMANCE.md      # Detailed benchmarks and architecture
@@ -253,6 +290,9 @@ axiart/
 - `noise_pattern.rs` - Marching squares for contours (357 lines)
 - `spiral.rs` - Geometric spiral generation (232 lines)
 - `grid.rs` - Grid generation with distortion (153 lines)
+- `voronoi.rs` - Voronoi diagrams with Lloyd's relaxation (~270 lines)
+- `lsystem.rs` - L-System expansion and turtle graphics (~320 lines)
+- `truchet.rs` - Truchet tile generation with multiple tile types (~280 lines)
 
 **Performance Characteristics**:
 - **100-300x speedup** for dendrite generation (spatial hash vs Python loops)

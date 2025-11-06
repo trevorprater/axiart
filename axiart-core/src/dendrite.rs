@@ -198,7 +198,10 @@ impl DendriteGenerator {
     ///
     /// * `max_attempts` - Maximum random walk attempts per particle (default: 1000)
     #[pyo3(signature = (max_attempts=1000))]
-    fn generate(&mut self, max_attempts: usize) -> PyResult<(Vec<(f64, f64)>, Vec<((f64, f64), (f64, f64))>)> {
+    fn generate(
+        &mut self,
+        max_attempts: usize,
+    ) -> PyResult<(Vec<(f64, f64)>, Vec<((f64, f64), (f64, f64))>)> {
         let mut points = self.seed_points.clone();
         let mut lines = Vec::new();
 
@@ -218,7 +221,9 @@ impl DendriteGenerator {
             // Random walk until particle sticks or exceeds max attempts
             for _ in 0..max_attempts {
                 // O(1) nearest neighbor search using spatial grid hash
-                if let Some((nearest_idx, dist_sq)) = grid.find_nearest(particle_pos.0, particle_pos.1, &points) {
+                if let Some((nearest_idx, dist_sq)) =
+                    grid.find_nearest(particle_pos.0, particle_pos.1, &points)
+                {
                     let distance = dist_sq.sqrt();
 
                     if distance < self.attraction_distance {
@@ -250,7 +255,11 @@ impl DendriteGenerator {
 
             // Progress indicator every 500 particles
             if (particle_idx + 1) % 500 == 0 {
-                println!("Generated {}/{} particles", particle_idx + 1, self.num_particles);
+                println!(
+                    "Generated {}/{} particles",
+                    particle_idx + 1,
+                    self.num_particles
+                );
             }
         }
 
@@ -286,10 +295,10 @@ impl DendriteGenerator {
                 // Spawn from edges
                 let edge = self.rng.gen_range(0..4);
                 match edge {
-                    0 => (self.rng.gen::<f64>() * self.width, 0.0),           // top
-                    1 => (self.width, self.rng.gen::<f64>() * self.height),  // right
-                    2 => (self.rng.gen::<f64>() * self.width, self.height),  // bottom
-                    _ => (0.0, self.rng.gen::<f64>() * self.height),         // left
+                    0 => (self.rng.gen::<f64>() * self.width, 0.0), // top
+                    1 => (self.width, self.rng.gen::<f64>() * self.height), // right
+                    2 => (self.rng.gen::<f64>() * self.width, self.height), // bottom
+                    _ => (0.0, self.rng.gen::<f64>() * self.height), // left
                 }
             }
         }

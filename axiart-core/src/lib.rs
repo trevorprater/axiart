@@ -14,11 +14,14 @@
 use pyo3::prelude::*;
 
 mod dendrite;
-mod noise_core;
 mod flow_field;
+mod grid;
+mod lsystem;
+mod noise_core;
 mod noise_pattern;
 mod spiral;
-mod grid;
+mod truchet;
+mod voronoi;
 
 /// AxiArt Core - Python module for high-performance pattern generation
 #[pymodule]
@@ -31,6 +34,11 @@ fn axiart_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<noise_pattern::NoisePatternGenerator>()?;
     m.add_class::<spiral::SpiralGenerator>()?;
     m.add_class::<grid::GridGenerator>()?;
+    m.add_class::<voronoi::VoronoiGenerator>()?;
+    m.add_class::<lsystem::LSystemGenerator>()?;
+    m.add_class::<lsystem::LSystemPreset>()?;
+    m.add_class::<truchet::TruchetGenerator>()?;
+    m.add_class::<truchet::TileType>()?;
 
     Ok(())
 }

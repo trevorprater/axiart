@@ -10,9 +10,9 @@ use std::f64::consts::PI;
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[pyclass(eq, eq_int)]
 pub enum SpiralType {
-    Archimedean,  // Linear growth
-    Logarithmic,  // Exponential growth
-    Concentric,   // Discrete circles
+    Archimedean, // Linear growth
+    Logarithmic, // Exponential growth
+    Concentric,  // Discrete circles
 }
 
 #[pymethods]
@@ -100,7 +100,10 @@ impl SpiralGenerator {
         let max_radius = end_radius.unwrap_or_else(|| {
             let dx = [self.center.0, self.width - self.center.0];
             let dy = [self.center.1, self.height - self.center.1];
-            dx.iter().chain(dy.iter()).fold(f64::INFINITY, |a, &b| a.min(b)) * 0.9
+            dx.iter()
+                .chain(dy.iter())
+                .fold(f64::INFINITY, |a, &b| a.min(b))
+                * 0.9
         });
 
         let total_points = self.num_revolutions * self.points_per_revolution;
@@ -166,7 +169,10 @@ impl SpiralGenerator {
         let max_radius = end_radius.unwrap_or_else(|| {
             let dx = [self.center.0, self.width - self.center.0];
             let dy = [self.center.1, self.height - self.center.1];
-            dx.iter().chain(dy.iter()).fold(f64::INFINITY, |a, &b| a.min(b)) * 0.9
+            dx.iter()
+                .chain(dy.iter())
+                .fold(f64::INFINITY, |a, &b| a.min(b))
+                * 0.9
         });
 
         let mut circles = Vec::new();
