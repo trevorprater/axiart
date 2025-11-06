@@ -61,7 +61,7 @@ jobs:
     - name: Test example imports
       run: |
         cd examples
-        uv run python -c "from axiart.patterns import VoronoiPattern, LSystemPattern, TruchetPattern; print('✓ All new patterns import successfully')"
+        uv run python -c "from axiart.patterns import VoronoiPattern, LSystemPattern, TruchetPattern; print('All new patterns import successfully')"
 
     - name: Run example scripts
       run: |
@@ -69,13 +69,13 @@ jobs:
         uv run python example_voronoi.py
         uv run python example_lsystem.py
         uv run python example_truchet.py
-        echo "✓ All example scripts executed successfully"
+        echo "All example scripts executed successfully"
 
     - name: Verify output files created
       run: |
         cd examples
         ls -lh output_voronoi.svg output_lsystem.svg output_truchet.svg
-        echo "✓ All output SVG files created"
+        echo "All output SVG files created"
 
     - name: Run benchmarks (quick version)
       run: |

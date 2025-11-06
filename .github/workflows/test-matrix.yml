@@ -59,9 +59,9 @@ jobs:
       run: |
         uv run python -c "
         from axiart.patterns import VoronoiPattern, LSystemPattern, TruchetPattern
-        print('✓ VoronoiPattern imported')
-        print('✓ LSystemPattern imported')
-        print('✓ TruchetPattern imported')
+        print('VoronoiPattern imported')
+        print('LSystemPattern imported')
+        print('TruchetPattern imported')
         "
 
     - name: Test pattern generation (quick)
@@ -75,19 +75,19 @@ jobs:
         canvas.create_layer('test', color='black')
         v = VoronoiPattern(width=100, height=100, num_sites=10, seed=42)
         v.generate()
-        print(f'✓ Voronoi: {len(v.get_sites())} sites, {len(v.get_edges())} edges')
+        print(f'Voronoi: {len(v.get_sites())} sites, {len(v.get_edges())} edges')
 
         # Test L-System
         l = LSystemPattern(width=100, height=100, preset='koch', iterations=3)
         l.generate()
-        print(f'✓ L-System: {len(l.get_lines())} lines')
+        print(f'L-System: {len(l.get_lines())} lines')
 
         # Test Truchet
         t = TruchetPattern(width=100, height=100, grid_size=5, seed=42)
         t.generate()
-        print(f'✓ Truchet: {len(t.get_lines())} lines, {len(t.get_curves())} curves')
+        print(f'Truchet: {len(t.get_lines())} lines, {len(t.get_curves())} curves')
 
-        print('✓ All patterns generated successfully on ${{ matrix.os }} with Python ${{ matrix.python-version }}')
+        print('All patterns generated successfully on ${{ matrix.os }} with Python ${{ matrix.python-version }}')
         "
 
     - name: Run example (Ubuntu only)
