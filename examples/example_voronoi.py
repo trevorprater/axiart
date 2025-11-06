@@ -48,11 +48,10 @@ def main():
         canvas.add_line(start, end, layer="voronoi")
 
     # Draw sites for both
-    for site in voronoi1.get_sites():
-        canvas.add_point(site, layer="sites")
+    canvas.add_points(voronoi1.get_sites(), layer="sites", radius=1.0)
 
-    for x, y in voronoi2.get_sites():
-        canvas.add_point((x + 157, y), layer="sites")
+    shifted_sites = [(x + 157, y) for x, y in voronoi2.get_sites()]
+    canvas.add_points(shifted_sites, layer="sites", radius=1.0)
 
     # Save
     canvas.save("output_voronoi.svg")

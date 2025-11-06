@@ -93,8 +93,7 @@ class VoronoiPattern:
 
         # Optionally draw sites
         if draw_sites:
-            for site in self.sites:
-                canvas.add_point(site, layer=layer)
+            canvas.add_points(self.sites, layer=layer, radius=1.0)
 
     def get_sites(self) -> List[Tuple[float, float]]:
         """Get all Voronoi sites."""
