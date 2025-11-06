@@ -26,8 +26,9 @@ def benchmark_lsystem():
         elapsed = time.time() - start
 
         lines = len(pattern.get_lines())
+        elapsed_safe = max(elapsed, 1e-6)  # Prevent division by zero
         print(f"  Iterations: {iterations}, Time: {elapsed:.3f}s, Lines: {lines}, "
-              f"Rate: {lines/elapsed:.0f} lines/sec")
+              f"Rate: {lines/elapsed_safe:.0f} lines/sec")
 
     # Test 2: Dragon Curve
     print("\n[Test 2] Dragon Curve")
@@ -43,8 +44,9 @@ def benchmark_lsystem():
         elapsed = time.time() - start
 
         lines = len(pattern.get_lines())
+        elapsed_safe = max(elapsed, 1e-6)  # Prevent division by zero
         print(f"  Iterations: {iterations}, Time: {elapsed:.3f}s, Lines: {lines}, "
-              f"Rate: {lines/elapsed:.0f} lines/sec")
+              f"Rate: {lines/elapsed_safe:.0f} lines/sec")
 
     # Test 3: Plant (with branching)
     print("\n[Test 3] Plant Pattern")
@@ -60,8 +62,9 @@ def benchmark_lsystem():
         elapsed = time.time() - start
 
         lines = len(pattern.get_lines())
+        elapsed_safe = max(elapsed, 1e-6)  # Prevent division by zero
         print(f"  Iterations: {iterations}, Time: {elapsed:.3f}s, Lines: {lines}, "
-              f"Rate: {lines/elapsed:.0f} lines/sec")
+              f"Rate: {lines/elapsed_safe:.0f} lines/sec")
 
     # Test 4: Hilbert Curve
     print("\n[Test 4] Hilbert Curve")
@@ -77,8 +80,9 @@ def benchmark_lsystem():
         elapsed = time.time() - start
 
         lines = len(pattern.get_lines())
+        elapsed_safe = max(elapsed, 1e-6)  # Prevent division by zero
         print(f"  Iterations: {iterations}, Time: {elapsed:.3f}s, Lines: {lines}, "
-              f"Rate: {lines/elapsed:.0f} lines/sec")
+              f"Rate: {lines/elapsed_safe:.0f} lines/sec")
 
     # Test 5: Custom L-System (complex rules)
     print("\n[Test 5] Custom Complex Pattern")
@@ -96,7 +100,8 @@ def benchmark_lsystem():
     elapsed = time.time() - start
 
     lines = len(pattern.get_lines())
-    print(f"  Time: {elapsed:.3f}s, Lines: {lines}, Rate: {lines/elapsed:.0f} lines/sec")
+    elapsed_safe = max(elapsed, 1e-6)  # Prevent division by zero
+    print(f"  Time: {elapsed:.3f}s, Lines: {lines}, Rate: {lines/elapsed_safe:.0f} lines/sec")
 
     print("\n" + "=" * 60)
     print("BENCHMARK COMPLETE")

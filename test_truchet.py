@@ -29,8 +29,9 @@ def benchmark_truchet():
 
         lines = len(pattern.get_lines())
         total_tiles = grid_size * grid_size
+        elapsed_safe = max(elapsed, 1e-6)  # Prevent division by zero
         print(f"  Grid: {grid_size}x{grid_size} ({total_tiles} tiles), Time: {elapsed:.3f}s, "
-              f"Lines: {lines}, Rate: {total_tiles/elapsed:.0f} tiles/sec")
+              f"Lines: {lines}, Rate: {total_tiles/elapsed_safe:.0f} tiles/sec")
 
     # Test 2: Arc tiles
     print("\n[Test 2] Arc Tiles")
@@ -50,8 +51,9 @@ def benchmark_truchet():
 
         curves = len(pattern.get_curves())
         total_tiles = grid_size * grid_size
+        elapsed_safe = max(elapsed, 1e-6)  # Prevent division by zero
         print(f"  Grid: {grid_size}x{grid_size} ({total_tiles} tiles), Time: {elapsed:.3f}s, "
-              f"Curves: {curves}, Rate: {total_tiles/elapsed:.0f} tiles/sec")
+              f"Curves: {curves}, Rate: {total_tiles/elapsed_safe:.0f} tiles/sec")
 
     # Test 3: Double arc tiles
     print("\n[Test 3] Double Arc Tiles")
@@ -71,8 +73,9 @@ def benchmark_truchet():
 
         curves = len(pattern.get_curves())
         total_tiles = grid_size * grid_size
+        elapsed_safe = max(elapsed, 1e-6)  # Prevent division by zero
         print(f"  Grid: {grid_size}x{grid_size} ({total_tiles} tiles), Time: {elapsed:.3f}s, "
-              f"Curves: {curves}, Rate: {total_tiles/elapsed:.0f} tiles/sec")
+              f"Curves: {curves}, Rate: {total_tiles/elapsed_safe:.0f} tiles/sec")
 
     # Test 4: Arc segment quality test
     print("\n[Test 4] Arc Segment Quality (30x30 grid)")
@@ -91,8 +94,9 @@ def benchmark_truchet():
         elapsed = time.time() - start
 
         curves = len(pattern.get_curves())
+        elapsed_safe = max(elapsed, 1e-6)  # Prevent division by zero
         print(f"  Segments: {segments}, Time: {elapsed:.3f}s, "
-              f"Curves: {curves}, Rate: {curves/elapsed:.0f} curves/sec")
+              f"Curves: {curves}, Rate: {curves/elapsed_safe:.0f} curves/sec")
 
     # Test 5: Large grid stress test
     print("\n[Test 5] Large Grid Stress Test")
@@ -111,8 +115,9 @@ def benchmark_truchet():
 
         lines = len(pattern.get_lines())
         total_tiles = grid_size * grid_size
+        elapsed_safe = max(elapsed, 1e-6)  # Prevent division by zero
         print(f"  Grid: {grid_size}x{grid_size} ({total_tiles} tiles), Time: {elapsed:.3f}s, "
-              f"Lines: {lines}, Rate: {total_tiles/elapsed:.0f} tiles/sec")
+              f"Lines: {lines}, Rate: {total_tiles/elapsed_safe:.0f} tiles/sec")
 
     print("\n" + "=" * 60)
     print("BENCHMARK COMPLETE")

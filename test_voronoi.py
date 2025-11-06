@@ -27,9 +27,10 @@ def benchmark_voronoi():
 
     sites = len(voronoi.get_sites())
     edges = len(voronoi.get_edges())
+    elapsed_safe = max(elapsed, 1e-6)  # Prevent division by zero
     print(f"  Time: {elapsed:.3f}s")
     print(f"  Sites: {sites}, Edges: {edges}")
-    print(f"  Performance: {sites/elapsed:.0f} sites/sec, {edges/elapsed:.0f} edges/sec")
+    print(f"  Performance: {sites/elapsed_safe:.0f} sites/sec, {edges/elapsed_safe:.0f} edges/sec")
 
     # Test 2: Medium number of sites
     print("\n[Test 2] 500 sites, no relaxation")
@@ -46,9 +47,10 @@ def benchmark_voronoi():
 
     sites = len(voronoi.get_sites())
     edges = len(voronoi.get_edges())
+    elapsed_safe = max(elapsed, 1e-6)  # Prevent division by zero
     print(f"  Time: {elapsed:.3f}s")
     print(f"  Sites: {sites}, Edges: {edges}")
-    print(f"  Performance: {sites/elapsed:.0f} sites/sec, {edges/elapsed:.0f} edges/sec")
+    print(f"  Performance: {sites/elapsed_safe:.0f} sites/sec, {edges/elapsed_safe:.0f} edges/sec")
 
     # Test 3: Large number of sites
     print("\n[Test 3] 1000 sites, no relaxation")
@@ -65,9 +67,10 @@ def benchmark_voronoi():
 
     sites = len(voronoi.get_sites())
     edges = len(voronoi.get_edges())
+    elapsed_safe = max(elapsed, 1e-6)  # Prevent division by zero
     print(f"  Time: {elapsed:.3f}s")
     print(f"  Sites: {sites}, Edges: {edges}")
-    print(f"  Performance: {sites/elapsed:.0f} sites/sec, {edges/elapsed:.0f} edges/sec")
+    print(f"  Performance: {sites/elapsed_safe:.0f} sites/sec, {edges/elapsed_safe:.0f} edges/sec")
 
     # Test 4: With Lloyd's relaxation
     print("\n[Test 4] 200 sites, 5 relaxation iterations")
@@ -84,9 +87,10 @@ def benchmark_voronoi():
 
     sites = len(voronoi.get_sites())
     edges = len(voronoi.get_edges())
+    elapsed_safe = max(elapsed, 1e-6)  # Prevent division by zero
     print(f"  Time: {elapsed:.3f}s")
     print(f"  Sites: {sites}, Edges: {edges}")
-    print(f"  Performance: {sites/elapsed:.0f} sites/sec (with relaxation)")
+    print(f"  Performance: {sites/elapsed_safe:.0f} sites/sec (with relaxation)")
 
     print("\n" + "=" * 60)
     print("BENCHMARK COMPLETE")
