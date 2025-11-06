@@ -15,6 +15,11 @@ dev = [
     "pytest>=7.4.0",
     "black>=23.0.0",
 ]
+diagram = [
+    "networkx>=3.0",
+    "cairosvg>=2.7.0",
+    "pillow>=9.0",
+]
 
 [build-system]
 requires = ["maturin>=1.7,<2.0"]
