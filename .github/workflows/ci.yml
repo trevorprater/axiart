@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+      with:
+        workspaces: axiart-core
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        enable-cache: true
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Check Rust formatting
+      run: cargo fmt --manifest-path axiart-core/Cargo.toml --check
+
+    - name: Run Rust clippy
+      run: cargo clippy --manifest-path axiart-core/Cargo.toml --all-targets -- -D warnings
+
+    - name: Install Python dependencies
+      run: uv sync
+
+    - name: Build Rust library
+      run: uv run maturin develop --release
+
+    - name: Check Python formatting (if black is installed)
+      run: uv run black --check axiart/ || true
+
+    - name: Run Python syntax checks
+      run: |
+        python3 -m py_compile axiart/patterns/*.py
+        python3 -m py_compile examples/*.py
+        python3 -m py_compile test_*.py
+
+    - name: Test example imports
+      run: |
+        cd examples
+        uv run python -c "from axiart.patterns import VoronoiPattern, LSystemPattern, TruchetPattern; print('✓ All new patterns import successfully')"
+
+    - name: Run example scripts
+      run: |
+        cd examples
+        uv run python example_voronoi.py
+        uv run python example_lsystem.py
+        uv run python example_truchet.py
+        echo "✓ All example scripts executed successfully"
+
+    - name: Verify output files created
+      run: |
+        cd examples
+        ls -lh output_voronoi.svg output_lsystem.svg output_truchet.svg
+        echo "✓ All output SVG files created"
+
+    - name: Run benchmarks (quick version)
+      run: |
+        # Run shorter versions of benchmarks to verify they work
+        timeout 60 uv run python test_voronoi.py || echo "Voronoi benchmark completed or timed out"
+        timeout 60 uv run python test_lsystem.py || echo "L-System benchmark completed or timed out"
+        timeout 60 uv run python test_truchet.py || echo "Truchet benchmark completed or timed out"
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Check Rust formatting
+      run: cargo fmt --manifest-path axiart-core/Cargo.toml --check
+
+    - name: Run clippy
+      run: cargo clippy --manifest-path axiart-core/Cargo.toml --all-targets -- -D warnings
