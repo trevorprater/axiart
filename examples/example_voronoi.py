@@ -55,7 +55,7 @@ def main():
 
     # Save
     canvas.save("output_voronoi.svg")
-    print("✓ Saved Voronoi diagram to output_voronoi.svg")
+    print("Saved Voronoi diagram to output_voronoi.svg")
     print(f"  Left: Random ({len(voronoi1.get_sites())} sites, {len(voronoi1.get_edges())} edges)")
     print(f"  Right: Relaxed ({len(voronoi2.get_sites())} sites, {len(voronoi2.get_edges())} edges)")
 

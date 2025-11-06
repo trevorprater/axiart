@@ -89,7 +89,7 @@ def main():
 
     # Save
     canvas.save("output_lsystem.svg")
-    print("✓ Saved L-System patterns to output_lsystem.svg")
+    print("Saved L-System patterns to output_lsystem.svg")
     print(f"  Koch Snowflake: {len(koch.get_lines())} lines")
     print(f"  Dragon Curve: {len(dragon.get_lines())} lines")
     print(f"  Plant 1: {len(plant1.get_lines())} lines")

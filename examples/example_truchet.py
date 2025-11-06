@@ -111,7 +111,7 @@ def main():
 
     # Save
     canvas.save("output_truchet.svg")
-    print("✓ Saved Truchet tile patterns to output_truchet.svg")
+    print("Saved Truchet tile patterns to output_truchet.svg")
     print(f"  Diagonal: {len(diagonal.get_lines())} lines")
     print(f"  Arcs: {len(arcs.get_curves())} curves")
     print(f"  Double Arcs: {len(double_arcs.get_curves())} curves")
