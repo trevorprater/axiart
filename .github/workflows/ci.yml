@@ -39,7 +39,7 @@ jobs:
       run: cargo fmt --manifest-path axiart-core/Cargo.toml --check
 
     - name: Run Rust clippy
-      run: cargo clippy --manifest-path axiart-core/Cargo.toml --all-targets -- -D warnings
+      run: cargo clippy --manifest-path axiart-core/Cargo.toml --all-targets --all-features -- -D warnings -A clippy::needless_return
 
     - name: Install Python dependencies
       run: uv sync
@@ -99,4 +99,4 @@ jobs:
       run: cargo fmt --manifest-path axiart-core/Cargo.toml --check
 
     - name: Run clippy
-      run: cargo clippy --manifest-path axiart-core/Cargo.toml --all-targets -- -D warnings
+      run: cargo clippy --manifest-path axiart-core/Cargo.toml --all-targets --all-features -- -D warnings -A clippy::needless_return
