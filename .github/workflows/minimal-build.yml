@@ -21,8 +21,4 @@ jobs:
       run: |
         cd axiart-core
         echo "=== Cargo check with verbose output ==="
-        cargo check --verbose --color=always 2>&1 || echo "Cargo check failed with exit code $?"
-        echo ""
-        echo "=== Attempting cargo build to see errors ==="
-        cargo build --verbose --color=always 2>&1 || echo "Cargo build failed with exit code $?"
-        exit 1
+        cargo check --verbose --color=always

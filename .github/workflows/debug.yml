@@ -34,21 +34,21 @@ jobs:
       run: |
         cd axiart-core
         cargo check --verbose
-        echo "✓ Rust compilation successful"
+        echo "Rust compilation successful"
 
     - name: Install dependencies and build with maturin
       run: |
         uv venv
         uv pip install numpy svgwrite maturin
         uv run maturin develop --release
-        echo "✓ Maturin build successful"
+        echo "Maturin build successful"
 
     - name: Test imports
       run: |
         uv run python -c "
         print('Testing imports...')
         from axiart.patterns import VoronoiPattern, LSystemPattern, TruchetPattern
-        print('✓ All imports successful')
+        print('All imports successful')
         "
 
     - name: Test basic generation
@@ -57,5 +57,5 @@ jobs:
         from axiart.patterns import VoronoiPattern
         v = VoronoiPattern(width=100, height=100, num_sites=5, seed=42)
         v.generate()
-        print(f'✓ Generated Voronoi with {len(v.get_sites())} sites')
+        print(f'Generated Voronoi with {len(v.get_sites())} sites')
         "
