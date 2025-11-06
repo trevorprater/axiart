@@ -161,7 +161,7 @@ impl LSystemGenerator {
     fn create_custom(
         width: f64,
         height: f64,
-        axiom: String,
+        axiom: &str,
         rules: Option<HashMap<String, String>>,
         angle: f64,
         iterations: usize,
@@ -180,7 +180,7 @@ impl LSystemGenerator {
             width,
             height,
             preset: LSystemPreset::Custom,
-            axiom,
+            axiom: axiom.to_string(),
             rules: rules_map,
             angle,
             step_length,
