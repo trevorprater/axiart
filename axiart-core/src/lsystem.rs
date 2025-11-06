@@ -341,15 +341,15 @@ impl LSystemGenerator {
 
     /// Expand the L-System string by one iteration
     fn expand(&self, input: &str) -> String {
-        input
-            .chars()
-            .map(|c| {
-                self.rules
-                    .get(&c)
-                    .map(|s| s.as_str())
-                    .unwrap_or(&c.to_string())
-            })
-            .collect()
+        let mut result = String::new();
+        for c in input.chars() {
+            if let Some(replacement) = self.rules.get(&c) {
+                result.push_str(replacement);
+            } else {
+                result.push(c);
+            }
+        }
+        result
     }
 
     /// Interpret L-System string as turtle graphics
