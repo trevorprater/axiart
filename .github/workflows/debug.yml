@@ -36,9 +36,10 @@ jobs:
         cargo check --verbose
         echo "✓ Rust compilation successful"
 
-    - name: Try to build with maturin
+    - name: Install dependencies and build with maturin
       run: |
-        uv sync
+        uv venv
+        uv pip install numpy svgwrite maturin
         uv run maturin develop --release
         echo "✓ Maturin build successful"
 

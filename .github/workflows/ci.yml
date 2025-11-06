@@ -42,7 +42,9 @@ jobs:
       run: cargo clippy --manifest-path axiart-core/Cargo.toml --all-targets --all-features || echo "Clippy warnings found but continuing"
 
     - name: Install Python dependencies
-      run: uv sync
+      run: |
+        uv venv
+        uv pip install numpy svgwrite maturin
 
     - name: Build Rust library
       run: uv run maturin develop --release
